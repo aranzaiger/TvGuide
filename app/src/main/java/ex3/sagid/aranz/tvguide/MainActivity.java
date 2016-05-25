@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         this.findButton = (Button) findViewById(R.id.findButton);
         this.view = (ListView) findViewById(R.id.listView);
 
-        this.findText.setHint("show name here...");
+        this.findText.setHint("Search series...");
 
         // Remove Auto Focus from the Text Fields
         layout.setFocusable(true);
@@ -53,14 +53,13 @@ public class MainActivity extends AppCompatActivity {
 //        queue = Volley.newRequestQueue(this);
         queue = MySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
 
+        //Android M Permission handling
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET}, 0);
 
 
 
 
-
-
-
+        //click on search button
         findButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -69,16 +68,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //click on listView item
         view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (!watchingEpisodes){
                     watchingEpisodes=true;
-//                    Toast.makeText(MainActivity.this, "here", Toast.LENGTH_LONG).show();
-
                     requestEpisodes(mVideo.get(position).getId());
                 }
-
             }
 
         });
@@ -138,15 +135,13 @@ public class MainActivity extends AppCompatActivity {
 //        queue.add(request);
         MySingleton.getInstance(this).addToRequestQueue(request);
 
-
     }
 
 
 
     private void loadData(JSONArray jArray, boolean isShow){
-
         mVideo = Video.getVideos(jArray, isShow);
+//        mImages =
         view.setAdapter(new ListAdapter(this , mVideo));
-
     }
 }

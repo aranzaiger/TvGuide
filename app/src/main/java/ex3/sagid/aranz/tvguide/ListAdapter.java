@@ -64,19 +64,13 @@ public class ListAdapter extends BaseAdapter {
         TextView header = (TextView) v.findViewById(R.id.infoHeaderTextView);
         TextView summery = (TextView) v.findViewById(R.id.infoInfoTextView);
         TextView footer = (TextView) v.findViewById(R.id.infoFooterTextView);
-//        ImageView image = (ImageView) v.findViewById(R.id.infoImageImageView);
 
-        Log.d("TAG", summery.toString());
         String url = mVideos.get(position).getImgURL();
-        Log.d("TAG","url is: " + url);
-//        if (url == "null"){
-//            url = "https://az853139.vo.msecnd.net/static/images/not-found.png";
-//        }
+        requestImage(url,v);
 
         header.setText(mVideos.get(position).getName());
         summery.setText(Html.fromHtml(mVideos.get(position).getSummary()));
         footer.setText(mVideos.get(position).getFooter());
-        requestImage(url,v);
 
         return v;
     }
@@ -95,7 +89,6 @@ public class ListAdapter extends BaseAdapter {
                 new Response.ErrorListener() {
                     public void onErrorResponse(VolleyError error) {
                         Log.d("TAG","failed to get image");
-//                        mImageView.setImageResource(R.drawable.image_load_error);
                     }
                 });
 // Access the RequestQueue through your singleton class.
