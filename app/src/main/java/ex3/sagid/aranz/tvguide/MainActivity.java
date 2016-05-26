@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,6 +24,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "[Main Activity] - ";
     protected Button findButton;
     protected ListView view;
     protected EditText findText;
@@ -30,13 +32,14 @@ public class MainActivity extends AppCompatActivity {
     protected RequestQueue queue;
     protected boolean watchingEpisodes;
     protected List<Video> mVideo;
+    protected ListAdapter listAdapter;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        this.listAdapter =  null; // Initialization will happen in depth
         watchingEpisodes = false;
         // UI Components
         this.layout = (LinearLayout) findViewById(R.id.layout);
@@ -46,9 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
         this.findText.setHint("Search series...");
 
-        // Remove Auto Focus from the Text Fields
-        layout.setFocusable(true);
-        layout.setFocusableInTouchMode(true);
+        removeTextFocus();
 
 //        queue = Volley.newRequestQueue(this);
         queue = MySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         findButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                removeTextFocus();
                 watchingEpisodes = false;
                requestShows(findText.getText().toString());
             }
@@ -82,9 +84,23 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void removeTextFocus() {
+        // Remove Auto Focus from the Text Fields
+
+        layout.setFocusable(true);
+        layout.setFocusableInTouchMode(true);
+        layout.requestFocus();
+        InputMethodManager inputManager =
+                (InputMethodManager) this.
+                        getSystemService(this.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow(
+                this.getCurrentFocus().getWindowToken(),
+                InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
 
     private void requestEpisodes(int id){
-        String url = "http://api.tvmaze.com/shows/" + id + "/episodes";
+        String url = createEpisodeURL(id);
         JsonArrayRequest request =
                 new JsonArrayRequest(
                         Request.Method.GET,
@@ -94,14 +110,14 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onResponse(JSONArray response){
 
-                                Log.d("TAG", "success: response - "+ response.toString());
+                                Log.d(TAG, "success: response - "+ response.toString());
                                 loadData(response, false);
                             }
                         },
                         new Response.ErrorListener(){
                             @Override
                             public void onErrorResponse(VolleyError error){
-                                Log.d("TAG", "error: msg: " +error.getMessage());
+                                Log.d(TAG, "error: msg: " +error.getMessage());
                             }
                         }
                 );
@@ -110,9 +126,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private String createEpisodeURL(int id) {
+        return "http://api.tvmaze.com/shows/" + id + "/episodes";
+    }
+
+    private String createShowURL(String show){
+        return  "http://api.tvmaze.com/search/shows?q=" + show;
+    }
+
 
     private void requestShows(String show){
-        String url = "http://api.tvmaze.com/search/shows?q=" + show;
+        String url = createShowURL(show);
         JsonArrayRequest request =
                 new JsonArrayRequest(
                         Request.Method.GET,
@@ -121,14 +145,14 @@ public class MainActivity extends AppCompatActivity {
                         new Response.Listener<JSONArray>(){
                             @Override
                             public void onResponse(JSONArray response){
-                                Log.d("TAG", "success: response - "+ response.toString());
+                                Log.d(TAG, "success: response - "+ response.toString());
                                 loadData(response, true);
                             }
                         },
                         new Response.ErrorListener(){
                             @Override
                             public void onErrorResponse(VolleyError error){
-                                Log.d("TAG", "error: msg: " +error.getMessage());
+                                Log.d(TAG, "error: msg: " +error.getMessage());
                             }
                         }
                 );
@@ -141,7 +165,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadData(JSONArray jArray, boolean isShow){
         mVideo = Video.getVideos(jArray, isShow);
-//        mImages =
-        view.setAdapter(new ListAdapter(this , mVideo));
+        if(listAdapter == null){
+            listAdapter = new ListAdapter(this, mVideo);
+        }else{
+            listAdapter.updateList(mVideo);
+            listAdapter.notifyDataSetChanged();
+        }
+        view.setAdapter(listAdapter);
     }
 }

@@ -10,7 +10,8 @@
         android:layout_height="0dp"
         android:layout_weight="0.1"
         android:text="New Text"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:padding="15dp" />
 
 
     <LinearLayout
@@ -31,7 +32,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.8"
             android:text="Large Text"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:padding="15dp" />
 
     </LinearLayout>
 
@@ -40,6 +42,7 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_weight="0.1"
-        android:text="New Text" />
+        android:text="New Text"
+        android:padding="15dp" />
 
 </LinearLayout>

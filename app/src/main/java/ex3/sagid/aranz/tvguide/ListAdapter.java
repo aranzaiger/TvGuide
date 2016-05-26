@@ -33,6 +33,7 @@ public class ListAdapter extends BaseAdapter {
     public ListAdapter(Context mContext, List<Video> mVideos) {
         this.mContext = mContext;
         this.mVideos = mVideos;
+
     }
 
     @Override
@@ -93,5 +94,9 @@ public class ListAdapter extends BaseAdapter {
                 });
 // Access the RequestQueue through your singleton class.
         MySingleton.getInstance(mContext).addToRequestQueue(request);
+    }
+
+    public void updateList(List<Video> updatedList){
+        this.mVideos = updatedList;
     }
 }
