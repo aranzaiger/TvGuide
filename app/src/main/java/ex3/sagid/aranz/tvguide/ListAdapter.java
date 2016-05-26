@@ -8,6 +8,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -23,16 +25,19 @@ import java.util.List;
  */
 public class ListAdapter extends BaseAdapter {
 
-    Context mContext;
+    protected Context mContext;
 
-    List<Video> mVideos;
-    ImageView mImageView;
+    protected List<Video> mVideos;
+    protected ImageView mImageView;
+
+    protected int lastPosition;
 
 
 
     public ListAdapter(Context mContext, List<Video> mVideos) {
         this.mContext = mContext;
         this.mVideos = mVideos;
+        this.lastPosition = -1;
 
     }
 
@@ -72,6 +77,10 @@ public class ListAdapter extends BaseAdapter {
         header.setText(mVideos.get(position).getName());
         summery.setText(Html.fromHtml(mVideos.get(position).getSummary()));
         footer.setText(mVideos.get(position).getFooter());
+
+        Animation animation = AnimationUtils.loadAnimation(mContext, (position > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);
+        v.startAnimation(animation);
+        lastPosition = position;
 
         return v;
     }
