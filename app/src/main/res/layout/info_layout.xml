@@ -20,7 +20,7 @@
         android:layout_weight="0.8"
         android:orientation="horizontal">
 
-        <ImageView
+        <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/infoImageImageView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

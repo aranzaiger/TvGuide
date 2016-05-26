@@ -6,6 +6,10 @@ import org.json.JSONObject;
 /**
  * Created by aranz on 22-May-16.
  */
+
+/**
+ * A type of Video
+ */
 public class Episode extends Video{
 
     public Episode(JSONObject jsonObject){

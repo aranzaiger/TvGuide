@@ -12,13 +12,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-
 import org.json.JSONArray;
 import java.util.List;
 
@@ -29,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
     protected ListView view;
     protected EditText findText;
     protected LinearLayout layout;
-    protected RequestQueue queue;
     protected boolean watchingEpisodes;
     protected List<Video> mVideo;
     protected ListAdapter listAdapter;
@@ -40,27 +36,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.listAdapter =  null; // Initialization will happen in depth
-        watchingEpisodes = false;
+        this.watchingEpisodes = false;
         // UI Components
         this.layout = (LinearLayout) findViewById(R.id.layout);
         this.findText = (EditText) findViewById(R.id.searchText);
         this.findButton = (Button) findViewById(R.id.findButton);
         this.view = (ListView) findViewById(R.id.listView);
-
         this.findText.setHint("Search series...");
-
         removeTextFocus();
-
-//        queue = Volley.newRequestQueue(this);
-        queue = MySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
-
-        //Android M Permission handling
+        // Android M Permission handling
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET}, 0);
-
-
-
-
-        //click on search button
+        // click on search button
         findButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -69,8 +55,7 @@ public class MainActivity extends AppCompatActivity {
                requestShows(findText.getText().toString());
             }
         });
-
-        //click on listView item
+        // click on listView item
         view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -84,21 +69,24 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * This function will remove the focus from the input field - and will remove the Keyboard if needed
+     */
     private void removeTextFocus() {
         // Remove Auto Focus from the Text Fields
 
         layout.setFocusable(true);
         layout.setFocusableInTouchMode(true);
         layout.requestFocus();
-        InputMethodManager inputManager =
-                (InputMethodManager) this.
-                        getSystemService(this.INPUT_METHOD_SERVICE);
-        inputManager.hideSoftInputFromWindow(
-                this.getCurrentFocus().getWindowToken(),
-                InputMethodManager.HIDE_NOT_ALWAYS);
+        // Remove the Keyboard - If exists
+        InputMethodManager inputManager = (InputMethodManager) this.getSystemService(this.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
-
+    /**
+     * Make an Episode HTTP request to the API
+     * @param id Series ID
+     */
     private void requestEpisodes(int id){
         String url = createEpisodeURL(id);
         JsonArrayRequest request =
@@ -121,20 +109,31 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                 );
-        MySingleton.getInstance(this).addToRequestQueue(request);
-//        queue.add(request);
-
+        VolleyUtilSingleTone.getInstance(this).addToRequestQueue(request);
     }
 
+    /**
+     * Generate a URL for Episodes requests
+     * @param id Series id
+     * @return String URL
+     */
     private String createEpisodeURL(int id) {
         return "http://api.tvmaze.com/shows/" + id + "/episodes";
     }
 
+    /**
+     * Generate a URL for Series request
+     * @param show Name of the Series
+     * @return String URL
+     */
     private String createShowURL(String show){
         return  "http://api.tvmaze.com/search/shows?q=" + show;
     }
 
-
+    /**
+     * HTTP request for Series
+     * @param show Name of Series
+     */
     private void requestShows(String show){
         String url = createShowURL(show);
         JsonArrayRequest request =
@@ -156,21 +155,24 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                 );
-//        queue.add(request);
-        MySingleton.getInstance(this).addToRequestQueue(request);
-
+        VolleyUtilSingleTone.getInstance(this).addToRequestQueue(request);
     }
 
-
-
-    private void loadData(JSONArray jArray, boolean isShow){
-        mVideo = Video.getVideos(jArray, isShow);
-        if(listAdapter == null){
+    /**
+     * Load the Data into The list view
+     * @param jArray HTTP response
+     * @param isSeries Boolean - is it a series or episode request
+     */
+    private void loadData(JSONArray jArray, boolean isSeries){
+        mVideo = Video.getVideos(jArray, isSeries);
+        if(listAdapter == null){ // In case of the first population - listAdapter is null
             listAdapter = new ListAdapter(this, mVideo);
-        }else{
+        }else{ // Update the View
             listAdapter.updateList(mVideo);
             listAdapter.notifyDataSetChanged();
         }
         view.setAdapter(listAdapter);
     }
+
+
 }

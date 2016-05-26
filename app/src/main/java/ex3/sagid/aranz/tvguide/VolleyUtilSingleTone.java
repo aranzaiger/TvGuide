@@ -1,8 +1,6 @@
 package ex3.sagid.aranz.tvguide;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.util.LruCache;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -12,37 +10,24 @@ import com.android.volley.toolbox.Volley;
 /**
  * Created by aranz on 23-May-16.
  */
-public class MySingleton {
+public class VolleyUtilSingleTone {
 
-        private static MySingleton mInstance;
+        private static VolleyUtilSingleTone mInstance;
         private RequestQueue mRequestQueue;
         private ImageLoader mImageLoader;
         private static Context mCtx;
 
-        private MySingleton(Context context) {
+
+        private VolleyUtilSingleTone(Context context) {
             mCtx = context;
             mRequestQueue = getRequestQueue();
 
-            mImageLoader = new ImageLoader(mRequestQueue,
-                    new ImageLoader.ImageCache() {
-                        private final LruCache<String, Bitmap>
-                                cache = new LruCache<String, Bitmap>(1024);
-
-                        @Override
-                        public Bitmap getBitmap(String url) {
-                            return cache.get(url);
-                        }
-
-                        @Override
-                        public void putBitmap(String url, Bitmap bitmap) {
-                            cache.put(url, bitmap);
-                        }
-                    });
+            mImageLoader = new ImageLoader(this.mRequestQueue,new LruBitmapCache());
         }
 
-        public static synchronized MySingleton getInstance(Context context) {
+        public static synchronized VolleyUtilSingleTone getInstance(Context context) {
             if (mInstance == null) {
-                mInstance = new MySingleton(context);
+                mInstance = new VolleyUtilSingleTone(context);
             }
             return mInstance;
         }
